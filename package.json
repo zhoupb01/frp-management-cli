@@ -1,0 +1,39 @@
+{
+    "name": "frp-management-cli",
+    "version": "0.0.2",
+    "private": false,
+    "description": "FRP Management CLI (frpm) - Ink/React based",
+    "bin": {
+        "frpm": "dist/cli.js"
+    },
+    "type": "module",
+    "scripts": {
+        "dev": "tsx src/cli.tsx",
+        "build": "tsup src/cli.tsx --format=esm --out-dir dist --minify --target=node18 --sourcemap",
+        "start": "node dist/cli.js"
+    },
+    "keywords": [
+        "frp",
+        "cli",
+        "ink",
+        "react"
+    ],
+    "license": "MIT",
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "commander": "^14.0.0",
+        "ink": "^6.1.0",
+        "ink-select-input": "^6.2.0",
+        "ink-text-input": "^6.0.0",
+        "react": "^19.1.1"
+    },
+    "devDependencies": {
+        "@types/node": "^24.2.0",
+        "@types/react": "^19.1.9",
+        "tsup": "^8.5.0",
+        "tsx": "^4.20.3",
+        "typescript": "^5.9.2"
+    }
+}
