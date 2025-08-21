@@ -7,7 +7,7 @@ import { loadConnections, saveConnections, type Connection } from '../utils/stor
 import { padToWidth, strWidth } from '../utils/text.js';
 
 export type InteractiveFormProps = {
-    mode?: 'add' | 'edit';
+    mode?: 'add' | 'edit' | 'copy';
     initial?: Connection | null;
     onComplete: (saved: Connection) => void;
     onCancel: () => void;
@@ -41,7 +41,7 @@ export default function InteractiveForm({ mode = 'add', initial = null, onComple
     const [draft, setDraft] = useState<Draft>(() => {
         if (initial) {
             return {
-                name: initial.name,
+                name: mode === 'copy' ? `${initial.name} - 复制` : initial.name, // 复制模式自动添加后缀
                 frp_server_addr: initial.frp_server_addr,
                 frp_server_port: String(initial.frp_server_port),
                 token: initial.token ?? '',
@@ -100,7 +100,10 @@ export default function InteractiveForm({ mode = 'add', initial = null, onComple
                 if (!String(v).trim()) return '名称必填';
                 if (existingNames) {
                     const newName = String(v).trim();
-                    const conflict = existingNames.includes(newName) && (!initial || newName !== initial.name);
+                    // 对于复制模式，按新增处理，不允许与任何现有名称重复
+                    // 对于编辑模式，允许与自己的原始名称重复
+                    const conflict = existingNames.includes(newName) && 
+                        (mode === 'copy' || mode === 'add' || !initial || newName !== initial.name);
                     if (conflict) return '名称已存在';
                 }
                 return null;
@@ -160,7 +163,7 @@ export default function InteractiveForm({ mode = 'add', initial = null, onComple
                 return;
             }
         }
-        if (mode === 'add') {
+        if (mode === 'add' || mode === 'copy') {
             const conn: Connection = {
                 id: randomUUID(),
                 name: draft.name.trim(),
@@ -184,7 +187,7 @@ export default function InteractiveForm({ mode = 'add', initial = null, onComple
             await saveConnections([...list, conn]);
             setSaving(false);
             onComplete(conn);
-        } else {
+        } else if (mode === 'edit') {
             // edit mode
             if (!initial) {
                 setSaving(false);
@@ -234,7 +237,7 @@ export default function InteractiveForm({ mode = 'add', initial = null, onComple
 
     return (
         <Box flexDirection="column">
-            <Text bold>{mode === 'edit' ? '编辑连接 - 向导' : '新增连接 - 向导'} (按 Esc 取消)</Text>
+            <Text bold>{mode === 'edit' ? '编辑连接 - 向导' : mode === 'copy' ? '复制连接 - 向导' : '新增连接 - 向导'} (按 Esc 取消)</Text>
             <Box marginTop={1} flexDirection="column">
                 {(['name', 'frp_server_addr', 'frp_server_port', 'token', 'type', 'local_ip', 'local_port', 'remote_port'] as StepKey[]).map((k) => {
                     if (steps.indexOf(k) < stepIndex || (step === 'confirm' && steps.indexOf(k) < steps.length - 1)) {

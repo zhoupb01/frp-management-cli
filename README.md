@@ -1,8 +1,19 @@
 # FRP Management CLI · frpm
 
+- 全屏交互式仪表盘：仅输入 `frpm` 即可进入可选、可滚动的连接列表与快捷键操作。
+- 命令驱动：`frpm list/add/copy/edit/start/stop/restart/logs` 一应俱全；适合脚本集成。
+- 连接复制：快速复制现有连接配置，自动生成新名称，提升配置效率。
+- 实时日志：内置轻量"tail -f"查看器，支持颜色高亮与文件轮询。
+- 数据持久化：在用户主目录 `~/.frpm/connections.json` 保存连接配置，简单直观。
+- 可配置 frpc 路径：在 `~/.frpm/settings.json` 指定 `frpcPath`；首次运行若未配置会弹出输入提示。
+- Windows 友好：进程停止使用 `taskkill`，仓库已包含 `bin/frpc.exe`（Windows）。
+- CJK 对齐：表格与列表对齐考虑中日韩宽字符，终端阅读更整齐。CLI · frpm
+
 Ink/React 打造的交互式终端 CLI，用于管理 frpc 连接（启动/停止/日志/增删改查）。
 
 ![node-badge](https://img.shields.io/badge/node-%E2%89%A518-orange) ![license-badge](https://img.shields.io/badge/license-MIT-green)
+
+📦 **GitHub 仓库**: [https://github.com/zhoupb01/frp-management-cli](https://github.com/zhoupb01/frp-management-cli)
 
 ## 特性
 
@@ -14,7 +25,7 @@ Ink/React 打造的交互式终端 CLI，用于管理 frpc 连接（启动/停�
 - Windows 友好：进程停止使用 `taskkill`，仓库已包含 `bin/frpc.exe`（Windows）。
 - CJK 对齐：表格与列表对齐考虑中日韩宽字符，终端阅读更整齐。
 
-> 当前为早期版本（0.0.1），功能以 TCP/UDP 基础代理为主。
+> 当前版本已支持连接复制功能，以 TCP/UDP 基础代理为主。
 
 ---
 
@@ -32,7 +43,7 @@ Ink/React 打造的交互式终端 CLI，用于管理 frpc 连接（启动/停�
 │   停止   -      ssh-service    tcp  127.0.0.1:22   ->  server.com:6022       │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
-[↑/↓] 导航  [Enter] 启动/停止  [l] 日志  [d] 删除  [a] 新增  [e] 修改  [q] 退出
+[↑/↓] 导航  [Enter] 启动/停止  [l] 日志  [d] 删除  [a] 新增  [c] 复制  [e] 修改  [q] 退出
 ```text
 
 列表（`frpm list`）：
@@ -93,16 +104,33 @@ node dist/cli.js list
 
 - 无参数：`frpm` 进入全屏仪表盘。
   - 快捷键：
-    - ↑/↓ 导航行；Enter 启动/停止；l 查看日志；a 新增；e 修改；d 删除；q 退出。
+    - ↑/↓ 导航行；Enter 启动/停止；l 查看日志；a 新增；c 复制；e 修改；d 删除；q 退出。
 
 - 子命令：
   - `frpm list` / `frpm ls`：显示所有连接的概览表。
   - `frpm add`：交互式向导新增连接（逐项输入，末尾确认）。
+  - `frpm copy <name>`：复制指定连接（交互式向导，预填充配置）。
   - `frpm edit <name>`：交互式编辑指定连接。
   - `frpm start <name>`：启动指定连接（后台运行，日志写入文件）。
   - `frpm stop <name>`：停止指定连接（Windows 使用 taskkill）。
   - `frpm restart <name>`：重启指定连接。
   - `frpm logs <name>`：实时查看日志（按 Esc 或 q 返回）。
+
+### 使用示例
+
+```bash
+# 列出所有连接
+frpm list
+
+# 新增连接
+frpm add
+
+# 复制现有连接（自动添加 " - 复制" 后缀避免名称冲突）
+frpm copy my-web-server
+
+# 在仪表盘中复制连接
+frpm  # 进入仪表盘，选择连接后按 'c' 键复制
+```
 
 ---
 

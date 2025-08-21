@@ -22,10 +22,11 @@ program
 // Full-screen dashboard with shortcuts
 function Dashboard() {
     const { connections, loading, error, reload, add, updateById, removeById } = useConnections();
-    const [mode, setMode] = useState<'list' | 'add' | 'edit' | 'logs'>('list');
+    const [mode, setMode] = useState<'list' | 'add' | 'edit' | 'copy' | 'logs'>('list');
     const [toast, setToast] = useState<{ kind: 'success' | 'error' | 'info'; text: string } | null>(null);
     const [selected, setSelected] = useState(0);
     const [logTarget, setLogTarget] = useState<Connection | null>(null);
+    const [copySource, setCopySource] = useState<Connection | null>(null);
     const [inputGuardUntil, setInputGuardUntil] = useState<number>(0);
     const [needFrpcPath, setNeedFrpcPath] = useState<boolean>(true);
     const [frpcPath, setFrpcPath] = useState<string>('');
@@ -63,6 +64,7 @@ function Dashboard() {
     useInput((input, key) => {
         if (Date.now() < inputGuardUntil) return; // 临时屏蔽输入，避免日志页返回时触发退出
         if (mode === 'add') return; // 表单内部处理输入
+        if (mode === 'copy') return; // 复制模式的表单内部处理输入
         if (mode === 'logs') return; // 日志页由组件自身处理 q/esc
 
         // 仅在列表模式允许 q/esc 退出
@@ -79,6 +81,13 @@ function Dashboard() {
         }
 
         const sel = connections[selected];
+
+        // c: 复制当前（需要选中项）
+        if (mode === 'list' && input?.toLowerCase() === 'c' && sel) {
+            setCopySource(sel);
+            setMode('copy');
+            return;
+        }
 
         // e: 编辑当前（需要选中项）
         if (mode === 'list' && input?.toLowerCase() === 'e' && sel) {
@@ -173,6 +182,26 @@ function Dashboard() {
         );
     }
 
+    if (mode === 'copy' && copySource) {
+        return (
+            <InteractiveForm
+                mode="copy"
+                initial={copySource}
+                onComplete={async () => {
+                    await reload();
+                    setToast({ kind: 'success', text: `已复制并保存 '${copySource.name}'` });
+                    setMode('list');
+                    setCopySource(null);
+                    setTimeout(() => setToast(null), 1200);
+                }}
+                onCancel={() => {
+                    setMode('list');
+                    setCopySource(null);
+                }}
+            />
+        );
+    }
+
     if (mode === 'logs' && logTarget) {
         return <LogViewer name={logTarget.name} onExit={() => { setMode('list'); setInputGuardUntil(Date.now() + 200); }} />;
     }
@@ -205,7 +234,7 @@ function Dashboard() {
             </Box>
 
             <Box marginTop={1}>
-                <Text color="gray">[↑/↓] 导航  [Enter] 启动/停止  [l] 日志  [d] 删除  [a] 新增  [e] 修改  [q] 退出</Text>
+                <Text color="gray">[↑/↓] 导航  [Enter] 启动/停止  [l] 日志  [d] 删除  [a] 新增  [c] 复制  [e] 修改  [q] 退出</Text>
             </Box>
         </Box>
     );
@@ -327,6 +356,30 @@ program
                     initial={target}
                     onComplete={() => {
                         render(<Box><Text color="green">✔ 已更新；你可以运行 `frpm list` 查看。</Text></Box>);
+                    }}
+                    onCancel={() => {
+                        render(<Box><Text color="gray">已取消。</Text></Box>);
+                    }}
+                />
+            );
+        };
+        render(<App />);
+    });
+
+program
+    .command('copy <name>')
+    .description('复制指定连接（交互式）')
+    .action(async (name: string) => {
+        const list = await loadConnections();
+        const target = list.find(c => c.name === name);
+        const App = () => {
+            if (!target) return <Box><Text color="red">✖ 未找到名为 '{name}' 的连接。</Text></Box>;
+            return (
+                <InteractiveForm
+                    mode="copy"
+                    initial={target}
+                    onComplete={() => {
+                        render(<Box><Text color="green">✔ 已复制并保存；你可以运行 `frpm list` 查看。</Text></Box>);
                     }}
                     onCancel={() => {
                         render(<Box><Text color="gray">已取消。</Text></Box>);
