@@ -1,6 +1,6 @@
 {
     "name": "frp-management-cli",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "private": false,
     "description": "FRP Management CLI (frpm) - Ink/React based",
     "bin": {
@@ -10,7 +10,8 @@
     "scripts": {
         "dev": "tsx src/cli.tsx",
         "build": "tsup src/cli.tsx --format=esm --out-dir dist --minify --target=node18 --sourcemap",
-        "start": "node dist/cli.js"
+        "start": "node dist/cli.js",
+        "prepublishOnly": "npm run build"
     },
     "keywords": [
         "frp",

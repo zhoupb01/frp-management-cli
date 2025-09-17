@@ -130,6 +130,9 @@ frpm copy my-web-server
 
 # 在仪表盘中复制连接
 frpm  # 进入仪表盘，选择连接后按 'c' 键复制
+
+# 发布到npmjs
+npm publish --registry https://registry.npmjs.org/
 ```
 
 ---

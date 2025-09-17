@@ -10,7 +10,7 @@ import FrpcPathPrompt from './components/FrpcPathPrompt.js';
 import { useConnections } from './hooks/useConnections.js';
 import { loadConnections, type Connection } from './utils/storage.js';
 import { loadSettings } from './utils/settings.js';
-import { startConnection, stopConnection, getEffectiveFrpcPath } from './utils/frpcManager.js';
+import { startConnection, stopConnection, getEffectiveFrpcPath, validateConnectionsStatus } from './utils/frpcManager.js';
 import fs from 'node:fs/promises';
 
 const program = new Command();
@@ -246,6 +246,7 @@ program
     .alias('ls')
     .description('列出已配置的连接')
     .action(async () => {
+        await validateConnectionsStatus();
         const list = await loadConnections();
         const App = () => {
             const total = list.length;
@@ -295,6 +296,7 @@ program
     .command('start <name>')
     .description('启动指定连接')
     .action(async (name: string) => {
+        await validateConnectionsStatus();
         const App = ({ msg, color }: { msg: string; color: string }) => (<Box><Text color={color}>{msg}</Text></Box>);
         try {
             const { pid } = await startConnection(name);
@@ -308,6 +310,7 @@ program
     .command('stop <name>')
     .description('停止指定连接')
     .action(async (name: string) => {
+        await validateConnectionsStatus();
         const App = ({ msg, color }: { msg: string; color: string }) => (<Box><Text color={color}>{msg}</Text></Box>);
         try {
             await stopConnection(name);
@@ -321,6 +324,7 @@ program
     .command('restart <name>')
     .description('重启指定连接')
     .action(async (name: string) => {
+        await validateConnectionsStatus();
         const App = ({ msg, color }: { msg: string; color: string }) => (<Box><Text color={color}>{msg}</Text></Box>);
         try {
             await stopConnection(name);
@@ -345,6 +349,7 @@ program
     .command('edit <name>')
     .description('编辑指定连接（交互式）')
     .action(async (name: string) => {
+        await validateConnectionsStatus();
         const list = await loadConnections();
         const target = list.find(c => c.name === name);
         const App = () => {
@@ -370,6 +375,7 @@ program
     .command('copy <name>')
     .description('复制指定连接（交互式）')
     .action(async (name: string) => {
+        await validateConnectionsStatus();
         const list = await loadConnections();
         const target = list.find(c => c.name === name);
         const App = () => {

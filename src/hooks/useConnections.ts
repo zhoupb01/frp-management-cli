@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { loadConnections, saveConnections, type Connection } from '../utils/storage.js';
+import { validateConnectionsStatus } from '../utils/frpcManager.js';
 
 export function useConnections() {
     const [connections, setConnections] = useState<Connection[]>([]);
@@ -9,6 +10,7 @@ export function useConnections() {
     const reload = useCallback(async () => {
         try {
             setLoading(true);
+            await validateConnectionsStatus();
             const list = await loadConnections();
             setConnections(list);
             setError(null);

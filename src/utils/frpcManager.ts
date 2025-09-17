@@ -137,3 +137,36 @@ export async function stopConnection(name: string): Promise<void> {
 export function getLogPathByName(name: string): string | null {
     return null; // we keep log path on the connection; the UI can read from storage
 }
+
+function isProcessAlive(pid: number): boolean {
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch (err: any) {
+        return err.code === 'EPERM';
+    }
+}
+
+export async function validateConnectionsStatus(): Promise<void> {
+    const connections = await loadConnections();
+    let hasChanges = false;
+
+    const updatedConnections = connections.map(conn => {
+        if (conn.status === 'running' && conn.pid) {
+            const isAlive = isProcessAlive(conn.pid);
+            if (!isAlive) {
+                hasChanges = true;
+                return {
+                    ...conn,
+                    status: 'stopped' as const,
+                    pid: null
+                };
+            }
+        }
+        return conn;
+    });
+
+    if (hasChanges) {
+        await saveConnections(updatedConnections);
+    }
+}
