@@ -1,0 +1,14 @@
+src/
+*.ts
+*.tsx
+tsconfig.json
+.gitignore
+CLAUDE.md
+node_modules/
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+bin/
