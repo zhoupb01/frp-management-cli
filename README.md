@@ -13,6 +13,8 @@ Ink/React 打造的交互式终端 CLI，用于管理 frpc 连接（启动/停�
 
 ![node-badge](https://img.shields.io/badge/node-%E2%89%A518-orange) ![license-badge](https://img.shields.io/badge/license-MIT-green)
 
+📦 **npm 包**: [https://www.npmjs.com/package/frp-management-cli](https://www.npmjs.com/package/frp-management-cli)
+
 📦 **GitHub 仓库**: [https://github.com/zhoupb01/frp-management-cli](https://github.com/zhoupb01/frp-management-cli)
 
 ## 特性
